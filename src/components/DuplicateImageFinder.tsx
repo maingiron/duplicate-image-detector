@@ -8,6 +8,8 @@ import {
 import { moveFilesToDirectory } from "../lib/fileService";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Copy } from "lucide-react";
+import { useToast } from "./ui/use-toast";
 import React from "react";
 
 interface ExtendedImageInfo extends ImageInfo {
@@ -37,6 +39,7 @@ const SUPPORTED_IMAGE_FORMATS = [
 ];
 
 export function DuplicateImageFinder() {
+  const { toast } = useToast();
   const [duplicateGroups, setDuplicateGroups] = useState<
     ExtendedDuplicateGroup[]
   >([]);
@@ -215,6 +218,22 @@ export function DuplicateImageFinder() {
     setSelectedImages(newSelection);
   };
 
+  const handleCopyName = async (name: string) => {
+    try {
+      await navigator.clipboard.writeText(name);
+      toast({
+        description: "Image name copied to clipboard",
+        duration: 2000,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Failed to copy image name",
+        duration: 2000,
+      });
+    }
+  };
+
   // Format file size to human-readable format
   const formatFileSize = (bytes: number): string => {
     const units = ["B", "KB", "MB", "GB"];
@@ -288,12 +307,22 @@ export function DuplicateImageFinder() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <p
-                            className="font-medium truncate"
-                            title={image.originalPath}
-                          >
-                            {image.path}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p
+                              className="font-medium truncate flex-1"
+                              title={image.originalPath}
+                            >
+                              {image.path}
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleCopyName(image.path)}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
                           <p className="text-sm text-gray-500">
                             Size: {formatFileSize(image.size)}
                           </p>
