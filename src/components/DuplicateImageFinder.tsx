@@ -21,6 +21,21 @@ interface ExtendedDuplicateGroup {
   images: ExtendedImageInfo[];
 }
 
+// Define supported image formats
+const SUPPORTED_IMAGE_FORMATS = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/bmp",
+  "image/tiff",
+  "image/svg+xml",
+  "image/x-icon",
+  "image/vnd.microsoft.icon",
+  "image/heic",
+  "image/heif",
+];
+
 export function DuplicateImageFinder() {
   const [duplicateGroups, setDuplicateGroups] = useState<
     ExtendedDuplicateGroup[]
@@ -45,7 +60,30 @@ export function DuplicateImageFinder() {
       input.onchange = async (e) => {
         const files = Array.from(
           (e.target as HTMLInputElement).files || []
-        ).filter((file) => /^image\/(jpeg|png|gif|webp)$/i.test(file.type));
+        ).filter((file) => {
+          // Check if the file type is in our supported formats
+          if (SUPPORTED_IMAGE_FORMATS.includes(file.type)) {
+            return true;
+          }
+
+          // Check file extension for formats that might not have proper MIME types
+          const extension = file.name.toLowerCase().split(".").pop();
+          const supportedExtensions = [
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "webp",
+            "bmp",
+            "tiff",
+            "tif",
+            "svg",
+            "ico",
+            "heic",
+            "heif",
+          ];
+          return extension && supportedExtensions.includes(extension);
+        });
 
         if (files.length === 0) {
           setError("No image files found in the selected directory");
@@ -75,21 +113,42 @@ export function DuplicateImageFinder() {
                 };
               } catch (err) {
                 URL.revokeObjectURL(imageUrl);
-                throw err;
+                console.warn(`Failed to process image ${file.name}:`, err);
+                return null; // Return null for failed images
               }
             })
           );
 
+          // Filter out failed images
+          const validImageInfos = imageInfos.filter(
+            (info): info is ExtendedImageInfo => info !== null
+          );
+
+          if (validImageInfos.length === 0) {
+            setError("No valid images could be processed");
+            setIsProcessing(false);
+            return;
+          }
+
           // Find duplicates
           const duplicates = findDuplicates(
-            imageInfos
+            validImageInfos
           ) as ExtendedDuplicateGroup[];
           setDuplicateGroups(duplicates);
 
           if (duplicates.length === 0) {
             // Clean up URLs if no duplicates found
-            imageInfos.forEach((info) => URL.revokeObjectURL(info.url));
+            validImageInfos.forEach((info) => URL.revokeObjectURL(info.url));
             setError("No duplicate images found");
+          }
+
+          // Show warning if some images failed to process
+          if (validImageInfos.length < files.length) {
+            console.warn(
+              `${
+                files.length - validImageInfos.length
+              } images failed to process`
+            );
           }
         } catch (err) {
           setError(
