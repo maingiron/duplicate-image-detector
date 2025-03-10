@@ -6,7 +6,7 @@
 
 Esta aplicação foi criada 100% por IA, utilizando [lovable.dev](https://lovable.dev) e Cursor AI. Seu objetivo é identificar e remover imagens duplicadas, facilitando o gerenciamento e upload de imagens para meu site [Mundo Colorir Desenhos](https://mundocolorirdesenhos.com.br/).
 
-## 👟 Como rodar a aplicação:
+## 👟 Como Rodar a Aplicação:
 
 ```sh
 # Passo 1: Instale as dependências
