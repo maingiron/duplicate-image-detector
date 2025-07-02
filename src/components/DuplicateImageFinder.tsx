@@ -5,12 +5,12 @@ import {
   type DuplicateGroup,
   type ImageInfo,
 } from "../lib/imageService";
-import { moveFilesToDirectory } from "../lib/fileService";
+import { moveFilesToDirectory, deleteFile } from "../lib/fileService";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Copy } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import React from "react";
 
@@ -238,6 +238,49 @@ export function DuplicateImageFinder() {
     }
   };
 
+  const handleDeleteImage = async (image: ExtendedImageInfo) => {
+    try {
+      setIsProcessing(true);
+
+      // Delete the file from the original directory
+      await deleteFile(image.file, baseDirectory);
+
+      // Remove the image from all duplicate groups
+      const updatedGroups = duplicateGroups
+        .map((group) => ({
+          images: group.images.filter((img) => img.path !== image.path),
+        }))
+        .filter((group) => group.images.length > 1);
+
+      setDuplicateGroups(updatedGroups);
+
+      // Remove from selected images if it was selected
+      if (selectedImages.has(image.path)) {
+        const newSelection = new Set(selectedImages);
+        newSelection.delete(image.path);
+        setSelectedImages(newSelection);
+      }
+
+      // Clean up the URL
+      URL.revokeObjectURL(image.url);
+
+      toast({
+        description: `Image "${image.path}" deleted successfully`,
+        duration: 2000,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: `Failed to delete image: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+        duration: 3000,
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   // Format file size to human-readable format
   const formatFileSize = (bytes: number): string => {
     const units = ["B", "KB", "MB", "GB"];
@@ -347,6 +390,15 @@ export function DuplicateImageFinder() {
                               onClick={() => handleCopyName(image.path)}
                             >
                               <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                              onClick={() => handleDeleteImage(image)}
+                              disabled={isProcessing}
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                           <p className="text-sm text-gray-500">
