@@ -44,3 +44,24 @@ export async function moveFilesToDirectory(
     throw err;
   }
 }
+
+export async function deleteFile(
+  file: File,
+  baseDirectory: string
+): Promise<void> {
+  try {
+    // Get the directory handle from the user
+    const dirHandle = await window.showDirectoryPicker({
+      mode: "readwrite",
+    });
+
+    // Get the file handle from the base directory
+    const fileHandle = await dirHandle.getFileHandle(file.name);
+
+    // Remove the file
+    await dirHandle.removeEntry(file.name);
+  } catch (err) {
+    console.error(`Failed to delete file ${file.name}:`, err);
+    throw err;
+  }
+}
