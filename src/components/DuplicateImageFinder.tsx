@@ -240,29 +240,8 @@ export function DuplicateImageFinder() {
 
   const handleDeleteImage = async (image: ExtendedImageInfo) => {
     try {
-      setIsProcessing(true);
-
       // Delete the file from the original directory
       await deleteFile(image.file, baseDirectory);
-
-      // Remove the image from all duplicate groups
-      const updatedGroups = duplicateGroups
-        .map((group) => ({
-          images: group.images.filter((img) => img.path !== image.path),
-        }))
-        .filter((group) => group.images.length > 1);
-
-      setDuplicateGroups(updatedGroups);
-
-      // Remove from selected images if it was selected
-      if (selectedImages.has(image.path)) {
-        const newSelection = new Set(selectedImages);
-        newSelection.delete(image.path);
-        setSelectedImages(newSelection);
-      }
-
-      // Clean up the URL
-      URL.revokeObjectURL(image.url);
 
       toast({
         description: `Image "${image.path}" deleted successfully`,
@@ -276,8 +255,6 @@ export function DuplicateImageFinder() {
         }`,
         duration: 3000,
       });
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -396,7 +373,6 @@ export function DuplicateImageFinder() {
                               size="icon"
                               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
                               onClick={() => handleDeleteImage(image)}
-                              disabled={isProcessing}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
