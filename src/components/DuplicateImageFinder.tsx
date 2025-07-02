@@ -8,6 +8,8 @@ import {
 import { moveFilesToDirectory } from "../lib/fileService";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import { Copy } from "lucide-react";
 import { useToast } from "./ui/use-toast";
 import React from "react";
@@ -47,6 +49,7 @@ export function DuplicateImageFinder() {
   const [error, setError] = useState<string | null>(null);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
   const [baseDirectory, setBaseDirectory] = useState<string>("");
+  const [threshold, setThreshold] = useState<number>(0.75);
 
   const handleDirectorySelect = async () => {
     try {
@@ -135,7 +138,8 @@ export function DuplicateImageFinder() {
 
           // Find duplicates
           const duplicates = findDuplicates(
-            validImageInfos
+            validImageInfos,
+            threshold
           ) as ExtendedDuplicateGroup[];
           setDuplicateGroups(duplicates);
 
@@ -260,23 +264,45 @@ export function DuplicateImageFinder() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex flex-col items-center gap-4">
-        <div className="flex gap-4 w-full max-w-md">
-          <Button
-            onClick={handleDirectorySelect}
-            disabled={isProcessing}
-            className="flex-1"
-          >
-            {isProcessing ? "Processing..." : "Select Directory"}
-          </Button>
+        <div className="w-full max-w-md space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="threshold">Similarity Threshold</Label>
+            <Input
+              id="threshold"
+              type="number"
+              min="0"
+              max="1"
+              step="0.01"
+              value={threshold}
+              onChange={(e) => setThreshold(parseFloat(e.target.value) || 0.75)}
+              placeholder="0.75"
+              className="w-full"
+            />
+            <p className="text-sm text-gray-500">
+              Higher values (closer to 1.0) require more similarity to detect
+              duplicates. Lower values (closer to 0.0) will detect more
+              potential duplicates.
+            </p>
+          </div>
 
-          <Button
-            onClick={handleMoveSelectedImages}
-            disabled={isProcessing || selectedImages.size === 0}
-            variant="secondary"
-            className="flex-1"
-          >
-            Move Selected ({selectedImages.size})
-          </Button>
+          <div className="flex gap-4 w-full">
+            <Button
+              onClick={handleDirectorySelect}
+              disabled={isProcessing}
+              className="flex-1"
+            >
+              {isProcessing ? "Processing..." : "Select Directory"}
+            </Button>
+
+            <Button
+              onClick={handleMoveSelectedImages}
+              disabled={isProcessing || selectedImages.size === 0}
+              variant="secondary"
+              className="flex-1"
+            >
+              Move Selected ({selectedImages.size})
+            </Button>
+          </div>
         </div>
 
         {error && <div className="text-red-500 text-center">{error}</div>}
