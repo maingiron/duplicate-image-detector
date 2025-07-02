@@ -204,7 +204,7 @@ export async function calculateImageHash(imageUrl: string): Promise<ImageInfo> {
 
 export function findDuplicates(
   images: ImageInfo[],
-  threshold = 0.7 // Lowered threshold significantly for more matches
+  threshold
 ): DuplicateGroup[] {
   const duplicateGroups: DuplicateGroup[] = [];
   const processedImages = new Set<string>();
