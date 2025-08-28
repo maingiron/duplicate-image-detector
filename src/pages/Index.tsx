@@ -22,6 +22,12 @@ const Index = () => {
                   Select a directory to find duplicate images using perceptual
                   hashing.
                 </p>
+                <a
+                  href="http://localhost:8080/python"
+                  className="text-blue-500"
+                >
+                  Script Python
+                </a>
               </div>
 
               <Card className="p-6">
