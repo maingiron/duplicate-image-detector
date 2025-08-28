@@ -38,25 +38,14 @@ Requirements are in `script/requirements.txt`.
 
 Steps:
 
-1. Create a virtualenv and install dependencies:
+1. Create a virtualenv and install dependencies and run the server
 
 ```bash
 cd script
 python -m venv .venv
 . .venv/Scripts/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-
-2. Run the server:
-
-```bash
 uvicorn server:app --reload --host 127.0.0.1 --port 8000
-```
-
-3. Start the Vite dev server (in another terminal) and open the Python UI at `/python`:
-
-```bash
-bun dev  # or npm run dev
 ```
 
 You can configure the API base via `VITE_PY_API` env var if needed.
