@@ -29,3 +29,23 @@ Este projeto foi desenvolvido utilizando:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Python backend (FastAPI)
+
+We ship a simple FastAPI server that exposes the duplicate image detector implemented in Python.
+
+Requirements are in `script/requirements.txt`.
+
+Steps:
+
+1. Create a virtualenv and install dependencies and run the server
+
+```bash
+cd script
+python -m venv .venv
+. .venv/Scripts/activate  # Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn server:app --reload --host 127.0.0.1 --port 8000
+```
+
+You can configure the API base via `VITE_PY_API` env var if needed.
